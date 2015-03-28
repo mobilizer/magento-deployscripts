@@ -146,6 +146,14 @@ Following files will be stored inside the base package
 
 ### <a name="installsh"></a>install.sh
 
+```
+Usage:
+ ./install.sh -e <environment> [-r <releaseFolder>] [-p <systemStorageFolder>] [-s]
+ -e Environment (e.g. production, staging, devbox,...)
+ -p systemstorage root path (populates s in systemstorage_import.sh!)
+ -s If set the systemstorage will not be imported
+```
+
 ### opsworks_*.sh
 
 ### systemstorage_import.sh

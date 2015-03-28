@@ -7,7 +7,7 @@ RELEASEFOLDER=$(readlink -f "${MY_PATH}/../../..")
 
 function usage {
     echo "Usage:"
-    echo " $0 -e <environment> [-r <releaseFolder>] [-s]"
+    echo " $0 -e <environment> [-r <releaseFolder>] [-p <systemStorageFolder>] [-s]"
     echo " -e Environment (e.g. production, staging, devbox,...)"
     echo " -p systemstorage root path (populates s in systemstorage_import.sh!)"
     echo " -s If set the systemstorage will not be imported"
