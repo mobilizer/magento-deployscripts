@@ -9,15 +9,17 @@ function usage {
     echo "Usage:"
     echo " $0 -e <environment> [-r <releaseFolder>] [-s]"
     echo " -e Environment (e.g. production, staging, devbox,...)"
+    echo " -p systemstorage root path (populates s in systemstorage_import.sh!)"
     echo " -s If set the systemstorage will not be imported"
     echo ""
     exit $1
 }
 
-while getopts 'e:r:s' OPTION ; do
+while getopts 'e:r:p:s' OPTION ; do
 case "${OPTION}" in
         e) ENVIRONMENT="${OPTARG}";;
         r) RELEASEFOLDER=`echo "${OPTARG}" | sed -e "s/\/*$//" `;; # delete last slash
+        p) SYSTEMSTORAGEPATH=`echo "${OPTARG}" | sed -e "s/\/*$//" `;; # delete last slash
         s) SKIPIMPORTFROMSYSTEMSTORAGE=true;;
         \?) echo; usage 1;;
     esac
@@ -84,6 +86,9 @@ else
         echo "Current environment is the master environment. Skipping import."
     else
         echo "Current environment is not the master environment. Importing system storage..."
+        ${SYSTEMSTORAGEPATH:="/home/systemstorage/systemstorage"}
+        if [ -z "${SYSTEMSTORAGEPATH}" ] ; then echo "Systemstorage directory ${SYSTEMSTORAGEPATH} not found"; exit 1; fi
+        echo "from systemstorage root path: ${SYSTEMSTORAGEPATH}"
 
         if [ ! -f "${RELEASEFOLDER}/Configuration/project.txt" ] ; then echo "Could not find project.txt"; exit 1; fi
         PROJECT=`cat ${RELEASEFOLDER}/Configuration/project.txt`
@@ -94,7 +99,7 @@ else
         ../tools/apply.php "${ENVIRONMENT}" ../Configuration/settings.csv --groups db || { echo "Error while applying db settings" ; exit 1; }
 
         # Import systemstorage
-        ../tools/systemstorage_import.sh -p "${RELEASEFOLDER}/htdocs/" -s "/home/systemstorage/systemstorage/${PROJECT}/backup/${MASTER_SYSTEM}" || { echo "Error while importing systemstorage"; exit 1; }
+        ../tools/systemstorage_import.sh -p "${RELEASEFOLDER}/htdocs/" -s "${SYSTEMSTORAGEPATH}/${PROJECT}/backup/${MASTER_SYSTEM}" || { echo "Error while importing systemstorage"; exit 1; }
     fi
 
 fi
