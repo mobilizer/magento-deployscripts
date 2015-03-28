@@ -59,7 +59,7 @@ if [ -z "${SKIPFILES}" ] ; then
 fi
 
 
-n98="/usr/bin/php -d apc.enable_cli=0 ${SOURCE_DIR}/n98-magerun.phar --root-dir=${PROJECT_WEBROOT}"
+n98="/usr/bin/env php -d apc.enable_cli=0 ${SOURCE_DIR}/n98-magerun.phar --root-dir=${PROJECT_WEBROOT}"
 
 
 # 1 day
