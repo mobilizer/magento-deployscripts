@@ -9,7 +9,7 @@ function usage {
     echo "Usage:"
     echo " $0 -e <environment> [-r <releaseFolder>] [-p <systemStorageFolder>] [-s]"
     echo " -e Environment (e.g. production, staging, devbox,...)"
-    echo " -p systemstorage root path (populates s in systemstorage_import.sh!)"
+    echo " -p systemstorage root path or SSH URI (populates s (!) in systemstorage_import.sh)"
     echo " -s If set the systemstorage will not be imported"
     echo ""
     exit $1
@@ -44,7 +44,11 @@ echo "Linking to shared directories"
 echo "-----------------------------"
 SHAREDFOLDER="${RELEASEFOLDER}/../../shared"
 if [ ! -d "${SHAREDFOLDER}" ] ; then
-    echo "Could not find '../../shared'. Trying '../../../shared' now"
+    echo "Could not find '../../shared'. Trying '../shared' now"
+    SHAREDFOLDER="${RELEASEFOLDER}/../shared";
+fi
+if [ ! -d "${SHAREDFOLDER}" ] ; then
+    echo "Could not find '../shared'. Trying '../../../shared' now"
     SHAREDFOLDER="${RELEASEFOLDER}/../../../shared";
 fi
 
@@ -86,8 +90,7 @@ else
         echo "Current environment is the master environment. Skipping import."
     else
         echo "Current environment is not the master environment. Importing system storage..."
-        ${SYSTEMSTORAGEPATH:="/home/systemstorage/systemstorage"}
-        if [ -z "${SYSTEMSTORAGEPATH}" ] ; then echo "Systemstorage directory ${SYSTEMSTORAGEPATH} not found"; exit 1; fi
+        if [ -z "${SYSTEMSTORAGEPATH}" ] ; then echo "Systemstorage path ${SYSTEMSTORAGEPATH} not found"; exit 1; fi
         echo "from systemstorage root path: ${SYSTEMSTORAGEPATH}"
 
         if [ ! -f "${RELEASEFOLDER}/Configuration/project.txt" ] ; then echo "Could not find project.txt"; exit 1; fi
@@ -98,8 +101,9 @@ else
         cd "${RELEASEFOLDER}/htdocs" || { echo "Error while switching to htdocs directory" ; exit 1; }
         ../tools/apply.php "${ENVIRONMENT}" ../Configuration/settings.csv --groups db || { echo "Error while applying db settings" ; exit 1; }
 
+        cd ..
         # Import systemstorage
-        ../tools/systemstorage_import.sh -p "${RELEASEFOLDER}/htdocs/" -s "${SYSTEMSTORAGEPATH}/${PROJECT}/backup/${MASTER_SYSTEM}" || { echo "Error while importing systemstorage"; exit 1; }
+        ./tools/systemstorage_import.sh -p "${RELEASEFOLDER}/htdocs/" -s "${SYSTEMSTORAGEPATH}/${PROJECT}/backup/${MASTER_SYSTEM}" || { echo "Error while importing systemstorage"; exit 1; }
     fi
 
 fi

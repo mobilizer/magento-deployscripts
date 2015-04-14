@@ -8,7 +8,7 @@ function usage {
     echo "Usage:"
     echo "$0 -p <projectWebRootPath> -s <systemStorageRootPath> [-a <awsCliProfile>] [-f]"
     echo "    -p <projectWebRootPath>       Project web root path (htdocs)"
-    echo "    -s <systemStorageRootPath>    Systemstorage project root path"
+    echo "    -s <systemStorageRootPath>    Systemstorage project root path or SSH URI"
     echo "    -f                            If set file will be skipped (database only)"
     echo ""
     echo "Example:"
@@ -39,18 +39,25 @@ function cleanup {
 
 if [[ "${SYSTEMSTORAGEPATH}" =~ ^s3:// ]] ; then
 
-    SYSTEMSTORAGE_LOCAL=`mktemp -d`
+    SYSTEMSTORAGE_LOCAL=`mktemp -d tmp/systemstorage-XXXX`
     trap cleanup EXIT
 
     if [ -z "${AWSCLIPROFILE}" ] ; then echo "No awsCliProfile given"; usage 1; fi
     echo "Downloading systemstorage from S3"
     aws --profile ${AWSCLIPROFILE} s3 cp --recursive "${SYSTEMSTORAGEPATH}" "${SYSTEMSTORAGE_LOCAL}" || { echo "Error while downloading package from S3" ; exit 1; }
+elif [[ ${SYSTEMSTORAGEPATH} == *:* ]] ; then
+
+    SYSTEMSTORAGE_LOCAL=`mktemp -d tmp/systemstorage-XXXX`
+    trap cleanup EXIT
+
+    echo "Downloading systemstorage via scp from ${SYSTEMSTORAGEPATH}"
+    scp -r "${SYSTEMSTORAGEPATH}"/* "${SYSTEMSTORAGE_LOCAL}" || { echo "Error while downloading package from ${SYSTEMSTORAGEPATH}" ; exit 1; }
 else
     SYSTEMSTORAGE_LOCAL=${SYSTEMSTORAGEPATH}
 fi
 
 if [ ! -d "${SYSTEMSTORAGE_LOCAL}" ] ; then echo "Could not find systemstorage project root $SYSTEMSTORAGE_LOCAL" ; usage 1; fi
-if [ ! -d "${SYSTEMSTORAGE_LOCAL}/database" ] ; then echo "Invalid $SYSTEMSTORAGE_LOCAL (could not find database folder)" ; exit 1; fi
+if [ ! -d "${SYSTEMSTORAGE_LOCAL}/database" ] ; then echo "Invalid ${SYSTEMSTORAGE_LOCAL}/database (could not find database folder)" ; exit 1; fi
 if [ ! -f "${SYSTEMSTORAGE_LOCAL}/database/combined_dump.sql.gz" ] ; then echo "Invalid $SYSTEMSTORAGE_LOCAL (could not find combined_dump.sql.gz)" ; exit 1; fi
 if [ ! -f "${SYSTEMSTORAGE_LOCAL}/database/created.txt" ] ; then echo "Invalid $SYSTEMSTORAGE_LOCAL (created.txt)" ; exit 1; fi
 
