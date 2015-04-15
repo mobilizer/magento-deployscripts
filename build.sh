@@ -3,7 +3,7 @@
 function usage {
     echo "Usage:"
     echo " $0 -f <packageFilename> -b <buildNumber> [-g <gitRevision>] [-r <projectRootDir>]"
-    echo " -f <packageFilename>    file name of the archive that will be created"
+    echo " -f <packageFilename>    file name (ending with .tar.gz) of the archive that will be created"
     echo " -b <buildNumber>        build number"
     echo " -g <gitRevision>        git revision"
     echo " -r <projectRootDir>     Path to the project dir. Defaults to current working directory."

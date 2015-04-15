@@ -36,7 +36,7 @@ TODO: add more information here
 ```
 Usage:
  ./build.sh -f <packageFilename> -b <buildNumber> [-g <gitRevision>] [-r <projectRootDir>]
- -f <packageFilename>    file name of the archive that will be created
+ -f <packageFilename>    file name (ending with .tar.gz) of the archive that will be created
  -b <buildNumber>        build number
  -g <gitRevision>        git revision
  -r <projectRootDir>     Path to the project dir. Defaults to current working directory.
