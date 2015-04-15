@@ -6,6 +6,7 @@ Author: Fabrizio Branca
 This is a collection of scripts used to build/package, deploy and install Magento projects.
 
 *Import note:*
+This is a fork adding support to load database systemstorage via SSH.
 Never use the master branch in your build jobs. Instead clone a specific tag:
 ```
 git clone -b v1.0.0 https://github.com/AOEpeople/magento-deployscripts.git
@@ -34,13 +35,11 @@ TODO: add more information here
 
 ```
 Usage:
- ./deploy.sh -r <packageUrl> -t <targetDir> -e <environment> [-u <downloadUsername>] [-p <downloadPassword>] [-a <awsCliProfile>] [-d]
- -r     Package url (http, S3 or local file)
- -t     Target dir
- -u     Download username
- -p     Download password
- -a     aws cli profile (defaults to 'default')
- -d     Also download and install .extra.tar.gz package
+ ./build.sh -f <packageFilename> -b <buildNumber> [-g <gitRevision>] [-r <projectRootDir>]
+ -f <packageFilename>    file name of the archive that will be created
+ -b <buildNumber>        build number
+ -g <gitRevision>        git revision
+ -r <projectRootDir>     Path to the project dir. Defaults to current working directory.
 ```
 
 Generated files
@@ -143,6 +142,17 @@ Following files will be stored inside the base package
 * htdocs/version.txt (will be accessible from the web)
 
 ### <a name="deploysh"></a>deploy.sh
+
+```
+Usage:
+ ./deploy.sh -r <packageUrl> -t <targetDir> -e <environment> [-u <downloadUsername>] [-p <downloadPassword>] [-a <awsCliProfile>] [-d]
+ -r     Package url (http, S3 or local file)
+ -t     Target dir
+ -u     Download username
+ -p     Download password
+ -a     aws cli profile (defaults to 'default')
+ -d     Also download and install .extra.tar.gz package
+```
 
 ### <a name="installsh"></a>install.sh
 

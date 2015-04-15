@@ -29,7 +29,7 @@ case "${OPTION}" in
     esac
 done
 
-if [ -z "${ENVIRONMENT}" ]; then echo "ERROR: Please provide an environment code (e.g. -e staging)"; exit 1; fi
+if [ -z "${ENVIRONMENT}" ]; then echo "ERROR: Please provide an environment code (e.g. -e staging)"; usage 1 ;  fi
 
 # Check if releases folder exists
 RELEASES="${ENVROOTDIR}/releases"
