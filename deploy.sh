@@ -2,9 +2,10 @@
 
 function usage {
     echo "Usage:"
-    echo " $0 -r <packageUrl> -t <targetDir> -e <environment> [-u <downloadUsername>] [-p <downloadPassword>] [-a <awsCliProfile>] [-d]"
+    echo " $0 -r <packageUrl> -t <targetDir> -e <environment> [-s <systemStoragePath>] [-u <downloadUsername>] [-p <downloadPassword>] [-a <awsCliProfile>] [-d]"
     echo " -r     Package url (http, S3 or local file)"
     echo " -t     Target dir"
+    echo " -s     Systemstorage root path or SSH URI"
     echo " -u     Download username"
     echo " -p     Download password"
     echo " -a     aws cli profile (defaults to 'default')"
@@ -16,10 +17,11 @@ function usage {
 AWSCLIPROFILE='default'
 EXTRA=0
 
-while getopts 'r:t:u:p:e:a:d' OPTION ; do
+while getopts 'r:t:s:u:p:e:a:d' OPTION ; do
 case "${OPTION}" in
         r) PACKAGEURL="${OPTARG}";;
-        t) ENVROOTDIR="${OPTARG}";;
+        t) ENVROOTDIR=`echo "${OPTARG}" | sed -e "s/\/*$//" `;; # delete last slash
+        s) SYSTEMSTORAGEPATH="${OPTARG}";;
         u) USERNAME="${OPTARG}";;
         p) PASSWORD="${OPTARG}";;
         e) ENVIRONMENT="${OPTARG}";;
@@ -102,9 +104,9 @@ if [ -d "${RELEASEFOLDER}" ] ; then echo "Release folder ${RELEASEFOLDER} alread
 mv "${TMPDIR}/package" "${RELEASEFOLDER}" || { echo "Error while moving package folder" ; exit 1; }
 
 
-# Install the package
+echo "Install the package"
 if [ ! -f "${RELEASEFOLDER}/tools/install.sh" ] ; then echo "Could not find installer" ; exit 1; fi
-${RELEASEFOLDER}/tools/install.sh -e "${ENVIRONMENT}" || { echo "Installing package failed"; exit 1; }
+${RELEASEFOLDER}/tools/install.sh -e "${ENVIRONMENT}" -s "${SYSTEMSTORAGEPATH}" || { echo "Installing package failed"; exit 1; }
 
 echo
 echo "Updating release symlinks"

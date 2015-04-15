@@ -7,20 +7,20 @@ RELEASEFOLDER=$(readlink -f "${MY_PATH}/../../..")
 
 function usage {
     echo "Usage:"
-    echo " $0 -e <environment> [-r <releaseFolder>] [-p <systemStorageFolder>] [-s]"
+    echo " $0 -e <environment> [-r <releaseFolder>] [-p <systemStorageFolder>] [-s <SystemStoragePath>] [-n]"
     echo " -e Environment (e.g. production, staging, devbox,...)"
-    echo " -p systemstorage root path or SSH URI (populates s (!) in systemstorage_import.sh)"
-    echo " -s If set the systemstorage will not be imported"
+    echo " -s Systemstorage root path or SSH URI"
+    echo " -n If set the systemstorage will not be imported"
     echo ""
     exit $1
 }
 
-while getopts 'e:r:p:s' OPTION ; do
+while getopts 'e:r:s:n' OPTION ; do
 case "${OPTION}" in
         e) ENVIRONMENT="${OPTARG}";;
         r) RELEASEFOLDER=`echo "${OPTARG}" | sed -e "s/\/*$//" `;; # delete last slash
-        p) SYSTEMSTORAGEPATH=`echo "${OPTARG}" | sed -e "s/\/*$//" `;; # delete last slash
-        s) SKIPIMPORTFROMSYSTEMSTORAGE=true;;
+        s) SYSTEMSTORAGEPATH=`echo "${OPTARG}" | sed -e "s/\/*$//" `;; # delete last slash
+        n) SKIPIMPORTFROMSYSTEMSTORAGE=true;;
         \?) echo; usage 1;;
     esac
 done
