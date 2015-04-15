@@ -73,15 +73,16 @@ tar -vczf "${BASEPACKAGE}" \
     --exclude=./tmp \
     --exclude-from="Configuration/tar_excludes.txt" . > tmp/base_files.txt || { echo "Creating archive failed"; exit 1; }
 
-echo "Deleting files that made it into the base package"
-while read -r line; do
-    if [ -e "$line" ] && ([ ! -d "$line" ] || ([ -d "$line" ] && [ ! "$(ls -A $line)" ])) ; then
-        rm -r "$line" || { echo "Deleting file/dir $line failed"; exit 1; }
-    fi
-done < "tmp/base_files.txt"
+# Issue with OS X tar outputs to 2> and with addational information => keep files => extra.tar.gz includes all files
+#echo "Deleting files that made it into the base package"
+#while read -r line; do
+#    if [ -e "$line" ] && ([ ! -d "$line" ] || ([ -d "$line" ] && [ ! "$(ls -A $line)" ])) ; then
+#        rm -r "$line" || { echo "Deleting file/dir $line failed"; exit 1; }
+#    fi
+#done < "tmp/base_files.txt"
 
-echo "Cleaning up empty directories"
-find . -type d -empty -delete
+#echo "Cleaning up empty directories"
+#find . -type d -empty -delete
 
 EXTRAPACKAGE=${BASEPACKAGE/.tar.gz/.extra.tar.gz}
 echo "Creating extra package '${EXTRAPACKAGE}' with the remaining files"
