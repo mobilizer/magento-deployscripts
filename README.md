@@ -158,10 +158,10 @@ Usage:
 
 ```
 Usage:
- ./install.sh -e <environment> [-r <releaseFolder>] [-p <systemStorageFolder>] [-s]
+ ./install.sh -e <environment> [-r <releaseFolder>] [-s <systemStoragePath>] [-n]
  -e Environment (e.g. production, staging, devbox,...)
  -p systemstorage root path or SSH URI (populates s (!) in systemstorage_import.sh)"
- -s If set the systemstorage will not be imported
+ -n If set the systemstorage will not be imported
 ```
 
 ### opsworks_*.sh
