@@ -53,6 +53,7 @@ elif [[ ${SYSTEMSTORAGEPATH} == *:* ]] ; then
     echo "Downloading systemstorage via scp from ${SYSTEMSTORAGEPATH}"
     scp -r "${SYSTEMSTORAGEPATH}"/* "${SYSTEMSTORAGE_LOCAL}" || { echo "Error while downloading package from ${SYSTEMSTORAGEPATH}" ; exit 1; }
 else
+	if [[ ! "${SYSTEMSTORAGEPATH}" = /* ]] ; then SYSTEMSTORAGEPATH=`cd "${SYSTEMSTORAGEPATH}"; pwd` ; fi # convert relative to absolute path
     SYSTEMSTORAGE_LOCAL=${SYSTEMSTORAGEPATH}
 fi
 
@@ -91,10 +92,10 @@ fi
 
 # Importing database...
 echo "Dropping all tables"
-$n98 -q db:drop --tables --force || { echo "Error while dropping all tables"; exit 1; }
+$n98 db:drop --tables --force || { echo "Error while dropping all tables"; exit 1; }
 
 echo "Import database dump ${SYSTEMSTORAGE_LOCAL}/database/combined_dump.sql.gz"
-$n98 -q db:import --compression=gzip "${SYSTEMSTORAGE_LOCAL}/database/combined_dump.sql.gz" ||  { echo "Error while importing dump"; exit 1; }
+$n98 db:import --compression=gzip "${SYSTEMSTORAGE_LOCAL}/database/combined_dump.sql.gz" ||  { echo "Error while importing dump"; exit 1; }
 
 
 
