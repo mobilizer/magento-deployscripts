@@ -7,7 +7,7 @@ RELEASEFOLDER=$(readlink -f "${MY_PATH}/../../..")
 
 function usage {
     echo "Usage:"
-    echo " $0 -e <environment> [-r <releaseFolder>] [-p <systemStorageFolder>] [-s <SystemStoragePath>] [-n]"
+    echo " $0 -e <environment> [-r <releaseFolder>] [-s <SystemStoragePath>] [-n]"
     echo " -e Environment (e.g. production, staging, devbox,...)"
     echo " -s Systemstorage root path or SSH URI"
     echo " -n If set the systemstorage will not be imported"
@@ -89,7 +89,7 @@ else
     if [ "${MASTER_SYSTEM}" == "${ENVIRONMENT}" ] ; then
         echo "Current environment is the master environment. Skipping import."
     else
-        echo "Current environment is not the master environment. Importing system storage..."
+        echo "Current environment (${ENVIRONMENT}) is not the master environment (${MASTER_SYSTEM}). Importing system storage..."
         if [ -z "${SYSTEMSTORAGEPATH}" ] ; then echo "Systemstorage path ${SYSTEMSTORAGEPATH} not found"; exit 1; fi
         echo "from systemstorage root path: ${SYSTEMSTORAGEPATH}"
 
