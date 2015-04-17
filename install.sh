@@ -25,6 +25,10 @@ case "${OPTION}" in
     esac
 done
 
+if [[ ! "${RELEASEFOLDER}" = /* ]] ; then RELEASEFOLDER=`cd "${RELEASEFOLDER}"; pwd` ; fi # convert relative to absolute path
+echo
+echo "Release Folder: ${RELEASEFOLDER}"
+
 if [ ! -f "${RELEASEFOLDER}/htdocs/index.php" ] ; then echo "Invalid release folder" ; exit 1; fi
 if [ ! -f "${RELEASEFOLDER}/tools/n98-magerun.phar" ] ; then echo "Could not find n98-magerun.phar" ; exit 1; fi
 if [ ! -f "${RELEASEFOLDER}/tools/apply.php" ] ; then echo "Could not find apply.php" ; exit 1; fi
@@ -56,7 +60,9 @@ if [ ! -d "${SHAREDFOLDER}" ] ; then echo "Shared directory ${SHAREDFOLDER} not 
 if [ ! -d "${SHAREDFOLDER}/media" ] ; then echo "Shared directory ${SHAREDFOLDER}/media not found"; exit 1; fi
 if [ ! -d "${SHAREDFOLDER}/var" ] ; then echo "Shared directory ${SHAREDFOLDER}/var not found"; exit 1; fi
 
+if [ -h "${RELEASEFOLDER}/htdocs/media" ]; then echo "Found existing media folder symlink. Removing."; rm "${RELEASEFOLDER}/htdocs/media"; fi
 if [ -d "${RELEASEFOLDER}/htdocs/media" ]; then echo "Found existing media folder that shouldn't be there"; exit 1; fi
+if [ -h "${RELEASEFOLDER}/htdocs/var" ]; then echo "Found existing var folder symlink. Removing."; rm "${RELEASEFOLDER}/htdocs/var"; fi
 if [ -d "${RELEASEFOLDER}/htdocs/var" ]; then echo "Found existing var folder that shouldn't be there"; exit 1; fi
 
 echo "Setting symlink (${RELEASEFOLDER}/htdocs/media) to shared media folder (${SHAREDFOLDER}/media)"
