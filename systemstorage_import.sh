@@ -40,6 +40,7 @@ function cleanup {
 if [[ "${SYSTEMSTORAGEPATH}" =~ ^s3:// ]] ; then
 
     SYSTEMSTORAGE_LOCAL=`mktemp -d tmp/systemstorage-XXXX`
+    SYSTEMSTORAGE_LOCAL=`cd "${SYSTEMSTORAGE_LOCAL}"; pwd`
     trap cleanup EXIT
 
     if [ -z "${AWSCLIPROFILE}" ] ; then echo "No awsCliProfile given"; usage 1; fi
@@ -48,6 +49,7 @@ if [[ "${SYSTEMSTORAGEPATH}" =~ ^s3:// ]] ; then
 elif [[ ${SYSTEMSTORAGEPATH} == *:* ]] ; then
 
     SYSTEMSTORAGE_LOCAL=`mktemp -d tmp/systemstorage-XXXX`
+    SYSTEMSTORAGE_LOCAL=`cd "${SYSTEMSTORAGE_LOCAL}"; pwd`
     trap cleanup EXIT
 
     echo "Downloading systemstorage via scp from ${SYSTEMSTORAGEPATH}"
