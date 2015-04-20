@@ -46,13 +46,13 @@ fi
 echo
 echo "Linking to shared directories"
 echo "-----------------------------"
-SHAREDFOLDER="${RELEASEFOLDER}/../../shared"
+SHAREDFOLDER="${RELEASEFOLDER}/../shared"
 if [ ! -d "${SHAREDFOLDER}" ] ; then
-    echo "Could not find '../../shared'. Trying '../shared' now"
-    SHAREDFOLDER="${RELEASEFOLDER}/../shared";
+    echo "Could not find '../shared'. Trying '../../shared' now"
+    SHAREDFOLDER="${RELEASEFOLDER}/../../shared";
 fi
 if [ ! -d "${SHAREDFOLDER}" ] ; then
-    echo "Could not find '../shared'. Trying '../../../shared' now"
+    echo "Could not find '../../shared'. Trying '../../../shared' now"
     SHAREDFOLDER="${RELEASEFOLDER}/../../../shared";
 fi
 
