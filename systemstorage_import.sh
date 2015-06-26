@@ -94,7 +94,7 @@ fi
 
 # Importing database...
 echo "Dropping all tables"
-$n98 db:drop --force || { echo "Error while dropping all tables"; exit 1; }
+$n98 db:drop --tables --force || { echo "Error while dropping all tables"; exit 1; }
 $n98 db:create || { echo "Error creating new database"; exit 1; }
 echo "Import database dump ${SYSTEMSTORAGE_LOCAL}/database/combined_dump.sql.gz"
 $n98 db:import --compression=gzip "${SYSTEMSTORAGE_LOCAL}/database/combined_dump.sql.gz" ||  { echo "Error while importing dump"; exit 1; }
