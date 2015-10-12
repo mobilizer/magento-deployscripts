@@ -82,7 +82,7 @@ tools/modman deploy-all --force || { echo "Error while running modman" ; exit 1;
 echo
 echo "Apply magento patch via modman --copy"
 echo "--------------"
-tools/modman deploy --force --copy magento_patches || { echo "Error while applying Magento patches. Expects module magento_patches." ; exit 1; }
+tools/modman deploy --force --copy magento_patches || { echo "Error while applying Magento patches. Expects module magento_patches." ; }
 
 
 echo
