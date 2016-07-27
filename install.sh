@@ -2,6 +2,17 @@
 
 VALID_ENVIRONMENTS=" production staging devbox devbox2 latest deploy integration "
 
+# OS X compatibility (greadlink, gsed, zcat are GNU implementations for OS X)
+[[ `uname` == 'Darwin' ]] && {
+	which greadlink gsed gzcat > /dev/null && {
+		unalias readlink sed zcat
+		alias readlink=greadlink sed=gsed zcat=gzcat
+	} || {
+		echo 'ERROR: GNU coreutils required for Mac. Try: brew install coreutils gnu-sed'
+		exit 1
+	}
+}
+
 MY_PATH=`dirname $(readlink -f "$0")`
 RELEASEFOLDER=$(readlink -f "${MY_PATH}/../../..")
 
