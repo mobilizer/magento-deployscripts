@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VALID_ENVIRONMENTS=" production staging devbox devbox2 latest deploy integration "
+VALID_ENVIRONMENTS=" production staging devbox latest deploy integration stage "
 
 # OS X compatibility (greadlink, gsed, zcat are GNU implementations for OS X)
 [[ `uname` == 'Darwin' ]] && {
@@ -18,20 +18,20 @@ RELEASEFOLDER=$(readlink -f "${MY_PATH}/../../..")
 
 function usage {
     echo "Usage:"
-    echo " $0 -e <environment> [-r <releaseFolder>] [-s <SystemStoragePath>] [-n]"
+    echo " $0 -e <environment> [-r <releaseFolder>] [-i <SystemStoragePath>] [-s]"
     echo " -e Environment (e.g. production, staging, devbox,...)"
-    echo " -s Systemstorage root path or SSH URI"
-    echo " -n If set the systemstorage will not be imported"
+    echo " -i Systemstorage root path or SSH URI"
+    echo " -s If set the systemstorage will not be imported"
     echo ""
     exit $1
 }
 
-while getopts 'e:r:s:n' OPTION ; do
+while getopts 'e:r:i:s' OPTION ; do
 case "${OPTION}" in
         e) ENVIRONMENT="${OPTARG}";;
         r) RELEASEFOLDER=`echo "${OPTARG}" | sed -e "s/\/*$//" `;; # delete last slash
-        s) SYSTEMSTORAGEPATH=`echo "${OPTARG}" | sed -e "s/\/*$//" `;; # delete last slash
-        n) SKIPIMPORTFROMSYSTEMSTORAGE=true;;
+        i) SYSTEMSTORAGEPATH=`echo "${OPTARG}" | sed -e "s/\/*$//" `;; # delete last slash
+        s) SKIPIMPORTFROMSYSTEMSTORAGE=true;;
         \?) echo; usage 1;;
     esac
 done
@@ -57,31 +57,34 @@ fi
 echo
 echo "Linking to shared directories"
 echo "-----------------------------"
-SHAREDFOLDER="${RELEASEFOLDER}/../shared"
-if [ ! -d "${SHAREDFOLDER}" ] ; then
-    echo "Could not find '../shared'. Trying '../../shared' now"
-    SHAREDFOLDER="${RELEASEFOLDER}/../../shared";
+if [[ -n ${SKIPSHAREDFOLDERCONFIG} ]]  && ${SKIPSHAREDFOLDERCONFIG} ; then
+    echo "Skipping shared directory config because parameter was set"
+else
+    SHAREDFOLDER="${RELEASEFOLDER}/../shared"
+	if [ ! -d "${SHAREDFOLDER}" ] ; then
+    	echo "Could not find '../shared'. Trying '../../shared' now"
+    	SHAREDFOLDER="${RELEASEFOLDER}/../../shared";
+	fi
+	if [ ! -d "${SHAREDFOLDER}" ] ; then
+    	echo "Could not find '../../shared'. Trying '../../../shared' now"
+    	SHAREDFOLDER="${RELEASEFOLDER}/../../../shared";
+	fi
+
+    if [ ! -d "${SHAREDFOLDER}" ] ; then echo "Shared directory ${SHAREDFOLDER} not found"; exit 1; fi
+    if [ ! -d "${SHAREDFOLDER}/media" ] ; then echo "Shared directory ${SHAREDFOLDER}/media not found"; exit 1; fi
+    if [ ! -d "${SHAREDFOLDER}/var" ] ; then echo "Shared directory ${SHAREDFOLDER}/var not found"; exit 1; fi
+
+	if [ -h "${RELEASEFOLDER}/htdocs/media" ]; then echo "Found existing media folder symlink. Removing."; rm "${RELEASEFOLDER}/htdocs/media"; fi
+	if [ -d "${RELEASEFOLDER}/htdocs/media" ]; then echo "Found existing media folder that shouldn't be there"; exit 1; fi
+	if [ -h "${RELEASEFOLDER}/htdocs/var" ]; then echo "Found existing var folder symlink. Removing."; rm "${RELEASEFOLDER}/htdocs/var"; fi
+	if [ -d "${RELEASEFOLDER}/htdocs/var" ]; then echo "Found existing var folder that shouldn't be there"; exit 1; fi
+
+    echo "Setting symlink (${RELEASEFOLDER}/htdocs/media) to shared media folder (${SHAREDFOLDER}/media)"
+    ln -s "${SHAREDFOLDER}/media" "${RELEASEFOLDER}/htdocs/media"  || { echo "Error while linking to shared media directory" ; exit 1; }
+
+    echo "Setting symlink (${RELEASEFOLDER}/htdocs/var) to shared var folder (${SHAREDFOLDER}/var)"
+    ln -s "${SHAREDFOLDER}/var" "${RELEASEFOLDER}/htdocs/var"  || { echo "Error while linking to shared var directory" ; exit 1; }
 fi
-if [ ! -d "${SHAREDFOLDER}" ] ; then
-    echo "Could not find '../../shared'. Trying '../../../shared' now"
-    SHAREDFOLDER="${RELEASEFOLDER}/../../../shared";
-fi
-
-if [ ! -d "${SHAREDFOLDER}" ] ; then echo "Shared directory ${SHAREDFOLDER} not found"; exit 1; fi
-if [ ! -d "${SHAREDFOLDER}/media" ] ; then echo "Shared directory ${SHAREDFOLDER}/media not found"; exit 1; fi
-if [ ! -d "${SHAREDFOLDER}/var" ] ; then echo "Shared directory ${SHAREDFOLDER}/var not found"; exit 1; fi
-
-if [ -h "${RELEASEFOLDER}/htdocs/media" ]; then echo "Found existing media folder symlink. Removing."; rm "${RELEASEFOLDER}/htdocs/media"; fi
-if [ -d "${RELEASEFOLDER}/htdocs/media" ]; then echo "Found existing media folder that shouldn't be there"; exit 1; fi
-if [ -h "${RELEASEFOLDER}/htdocs/var" ]; then echo "Found existing var folder symlink. Removing."; rm "${RELEASEFOLDER}/htdocs/var"; fi
-if [ -d "${RELEASEFOLDER}/htdocs/var" ]; then echo "Found existing var folder that shouldn't be there"; exit 1; fi
-
-echo "Setting symlink (${RELEASEFOLDER}/htdocs/media) to shared media folder (${SHAREDFOLDER}/media)"
-ln -s "${SHAREDFOLDER}/media" "${RELEASEFOLDER}/htdocs/media"  || { echo "Error while linking to shared media directory" ; exit 1; }
-
-echo "Setting symlink (${RELEASEFOLDER}/htdocs/var) to shared var folder (${SHAREDFOLDER}/var)"
-ln -s "${SHAREDFOLDER}/var" "${RELEASEFOLDER}/htdocs/var"  || { echo "Error while linking to shared var directory" ; exit 1; }
-
 
 
 echo
@@ -103,9 +106,11 @@ if [[ -n ${SKIPIMPORTFROMSYSTEMSTORAGE} ]]  && ${SKIPIMPORTFROMSYSTEMSTORAGE} ; 
     echo "Skipping import system storage backup because parameter was set"
 else
 
-    if [ ! -f "${RELEASEFOLDER}/Configuration/mastersystem.txt" ] ; then echo "Could not find mastersystem.txt"; exit 1; fi
-    MASTER_SYSTEM=`cat ${RELEASEFOLDER}/Configuration/mastersystem.txt`
-    if [ -z "${MASTER_SYSTEM}" ] ; then echo "Error reading master system"; exit 1; fi
+    if [ -z "${MASTER_SYSTEM}" ] ; then
+        if [ ! -f "${RELEASEFOLDER}/Configuration/mastersystem.txt" ] ; then echo "Could not find mastersystem.txt"; exit 1; fi
+        MASTER_SYSTEM=`cat ${RELEASEFOLDER}/Configuration/mastersystem.txt`
+        if [ -z "${MASTER_SYSTEM}" ] ; then echo "Error reading master system"; exit 1; fi
+    fi
 
     if [ "${MASTER_SYSTEM}" == "${ENVIRONMENT}" ] ; then
         echo "Current environment is the master environment. Skipping import."
@@ -114,17 +119,19 @@ else
         if [ -z "${SYSTEMSTORAGEPATH}" ] ; then echo "Systemstorage path ${SYSTEMSTORAGEPATH} not found"; exit 1; fi
         echo "from systemstorage root path: ${SYSTEMSTORAGEPATH}"
 
-        if [ ! -f "${RELEASEFOLDER}/Configuration/project.txt" ] ; then echo "Could not find project.txt"; exit 1; fi
-        PROJECT=`cat ${RELEASEFOLDER}/Configuration/project.txt`
-        if [ -z "${PROJECT}" ] ; then echo "Error reading project name"; exit 1; fi
+        if [ -z "${PROJECT}" ] ; then
+            if [ ! -f "${RELEASEFOLDER}/Configuration/project.txt" ] ; then echo "Could not find project.txt"; exit 1; fi
+            PROJECT=`cat ${RELEASEFOLDER}/Configuration/project.txt`
+            if [ -z "${PROJECT}" ] ; then echo "Error reading project name"; exit 1; fi
+        fi
 
         # Apply db settings
         cd "${RELEASEFOLDER}/htdocs" || { echo "Error while switching to htdocs directory" ; exit 1; }
         ../tools/apply.php "${ENVIRONMENT}" ../Configuration/settings.csv --groups db || { echo "Error while applying db settings" ; exit 1; }
 
-        cd ..
+
         # Import systemstorage
-        ./tools/systemstorage_import.sh -p "${RELEASEFOLDER}/htdocs/" -s "${SYSTEMSTORAGEPATH}/${PROJECT}/backup/${MASTER_SYSTEM}" || { echo "Error while importing systemstorage"; exit 1; }
+        ../tools/systemstorage_import.sh -p "${RELEASEFOLDER}/htdocs/" -s "${SYSTEMSTORAGEPATH}/${PROJECT}/backup/${MASTER_SYSTEM}" || { echo "Error while importing systemstorage"; exit 1; }
     fi
 
 fi
@@ -138,16 +145,20 @@ cd "${RELEASEFOLDER}/htdocs" || { echo "Error while switching to htdocs director
 echo
 
 
-#echo
-#echo "Setting revalidate class path cache flag (Aoe_ClassPathCache)"
-#cd "${RELEASEFOLDER}/htdocs/shell" || { echo "Error while switching to htdocs/shell directory" ; exit 1; }
-#php aoe_classpathcache.php -action setRevalidateFlag || { echo "Error while revalidating Aoe_ClassPathCache" ; exit 1; }
+
+if [ -f "${RELEASEFOLDER}/htdocs/shell/aoe_classpathcache.php" ] ; then
+    echo
+    echo "Setting revalidate class path cache flag (Aoe_ClassPathCache)"
+    echo "-------------------------------------------------------------"
+    cd "${RELEASEFOLDER}/htdocs/shell" || { echo "Error while switching to htdocs/shell directory" ; exit 1; }
+    php aoe_classpathcache.php -action setRevalidateFlag || { echo "Error while revalidating Aoe_ClassPathCache" ; exit 1; }
+fi
 
 
 
 echo
-echo "Triggering Magento setup scripts vi n98-magerun"
-echo "-----------------------------------------------"
+echo "Triggering Magento setup scripts via n98-magerun"
+echo "------------------------------------------------"
 cd -P "${RELEASEFOLDER}/htdocs/" || { echo "Error while switching to htdocs directory" ; exit 1; }
 ../tools/n98-magerun.phar sys:setup:run || { echo "Error while triggering the update scripts using n98-magerun" ; exit 1; }
 

@@ -43,9 +43,12 @@ if [[ "${SYSTEMSTORAGEPATH}" =~ ^s3:// ]] ; then
     SYSTEMSTORAGE_LOCAL=`cd "${SYSTEMSTORAGE_LOCAL}"; pwd`
     trap cleanup EXIT
 
-    if [ -z "${AWSCLIPROFILE}" ] ; then echo "No awsCliProfile given"; usage 1; fi
+    PROFILEPARAM=""
+    if [ ! -z "${AWSCLIPROFILE}" ] ; then
+        PROFILEPARAM="--profile ${AWSCLIPROFILE}"
+    fi
     echo "Downloading systemstorage from S3"
-    aws --profile ${AWSCLIPROFILE} s3 cp --recursive "${SYSTEMSTORAGEPATH}" "${SYSTEMSTORAGE_LOCAL}" || { echo "Error while downloading package from S3" ; exit 1; }
+    aws ${PROFILEPARAM} s3 sync --exact-timestamps --delete "${SYSTEMSTORAGEPATH}" "${SYSTEMSTORAGE_LOCAL}" || { echo "Error while syncing files from S3 to local" ; exit 1; }
 elif [[ ${SYSTEMSTORAGEPATH} == *:* ]] ; then
 
     SYSTEMSTORAGE_LOCAL=`mktemp -d tmp/systemstorage-XXXX`
@@ -58,6 +61,7 @@ else
 	if [[ ! "${SYSTEMSTORAGEPATH}" = /* ]] ; then SYSTEMSTORAGEPATH=`cd "${SYSTEMSTORAGEPATH}"; pwd` ; fi # convert relative to absolute path
     SYSTEMSTORAGE_LOCAL=${SYSTEMSTORAGEPATH}
 fi
+
 
 if [ ! -d "${SYSTEMSTORAGE_LOCAL}" ] ; then echo "Could not find systemstorage project root $SYSTEMSTORAGE_LOCAL" ; usage 1; fi
 if [ ! -d "${SYSTEMSTORAGE_LOCAL}/database" ] ; then echo "Invalid ${SYSTEMSTORAGE_LOCAL}/database (could not find database folder)" ; exit 1; fi
