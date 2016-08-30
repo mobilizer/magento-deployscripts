@@ -158,10 +158,10 @@ Usage:
 
 ```
 Usage:
- ./install.sh -e <environment> [-r <releaseFolder>] [-s <systemStoragePath>] [-n]
- -e Environment (e.g. production, staging, devbox,...)
- -p systemstorage root path or SSH URI (populates s (!) in systemstorage_import.sh)"
- -n If set the systemstorage will not be imported
+ ./install.sh -e <environment> [-r <releaseFolder>] [-i <SystemStoragePath>] [-s]
+-e Environment (e.g. production, staging, devbox,...)
+-i Systemstorage root path or SSH URI
+-s If set the systemstorage will not be imported
 ```
 
 ### opsworks_*.sh
@@ -171,9 +171,12 @@ Usage:
 ```
 Usage:
 tools/systemstorage_import.sh -p <projectWebRootPath> -s <systemStorageRootPath> [-a <awsCliProfile>] [-f]
-    -p <projectWebRootPath>       Project web root path (htdocs)
-    -s <systemStorageRootPath>    Systemstorage project root path or SSH URI
-    -f                            If set file will be skipped (database only)
+-p <projectWebRootPath>       Project web root path (htdocs)
+-s <systemStorageRootPath>    Systemstorage project root path or SSH URI
+-f                            If set file will be skipped (database only)
+
+Example:
+-p /var/www/projectname/deploy/htdocs -s /home/systemstorage/systemstorage/projectname/backup/deploy
 ```
 
 ### *lint.sh
