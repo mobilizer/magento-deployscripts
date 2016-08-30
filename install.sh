@@ -42,7 +42,7 @@ echo "Release Folder: ${RELEASEFOLDER}"
 
 if [ ! -f "${RELEASEFOLDER}/htdocs/index.php" ] ; then echo "Invalid release folder" ; exit 1; fi
 if [ ! -f "${RELEASEFOLDER}/tools/n98-magerun.phar" ] ; then echo "Could not find n98-magerun.phar" ; exit 1; fi
-if [ ! -f "${RELEASEFOLDER}/tools/apply.php" ] ; then echo "Could not find apply.php" ; exit 1; fi
+if [ ! -f "${RELEASEFOLDER}/tools/zettr.phar" ] ; then echo "Could not find tools/zettr.phar" ; exit 1; fi
 if [ ! -f "${RELEASEFOLDER}/Configuration/settings.csv" ] ; then echo "Could not find settings.csv" ; exit 1; fi
 
 # Checking environment
@@ -141,7 +141,12 @@ echo
 echo "Applying settings"
 echo "-----------------"
 cd "${RELEASEFOLDER}/htdocs" || { echo "Error while switching to htdocs directory" ; exit 1; }
-../tools/apply.php ${ENVIRONMENT} ../Configuration/settings.csv || { echo "Error while applying settings" ; exit 1; }
+if [ -f ../Configuration/settings.csv ]; then
+    ../tools/zettr.phar apply ${ENVIRONMENT} ../Configuration/settings.csv --groups db || { echo "Error while applying database settings" ; exit 1; }
+    ../tools/zettr.phar apply ${ENVIRONMENT} ../Configuration/settings.csv || { echo "Error while applying settings" ; exit 1; }
+else
+    echo "No Configuration/settings.csv found!"
+fi
 echo
 
 
