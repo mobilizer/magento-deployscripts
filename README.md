@@ -84,7 +84,7 @@ Checkout http://www.slideshare.net/aoepeople/rock-solid-magento/55 (and the next
 Additionally install.sh expects/checks these files:
 
 * tools/systemstorage_import.sh (This is part of https://github.com/AOEpeople/magento-deployscripts which is being pulled in via composer)
-* tools/apply (This is part of https://github.com/AOEpeople/EnvSettingsTool which is being pulled in via composer)
+* tools/zettr.phar (This is part of https://github.com/AOEpeople/zettr which is being pulled in via composer)
 * tools/n98-magerun.phar (This is part of https://github.com/AOEpeople/magento-deployscripts which is being pulled in via composer)
 * Configuration/settings.csv (This is being used by EnvSettingsTool to apply all environment specific settings during the installation process)
 * Configuration/mastersystem.txt (Defines which system is the master system. E.g. "production". This is required to determine if the systemstorage backup needs to be imported during the installation process.)
