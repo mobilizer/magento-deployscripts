@@ -109,7 +109,7 @@ These files and folders can easily be constructud by using following composer.js
         },
         {
             "type": "vcs",
-            "url": "https://github.com/AOEpeople/EnvSettingsTool.git"
+            "url": "https://github.com/AOEpeople/zettr.git"
         },
         {
             "type": "package",

@@ -127,7 +127,7 @@ else
 
         # Apply db settings
         cd "${RELEASEFOLDER}/htdocs" || { echo "Error while switching to htdocs directory" ; exit 1; }
-        ../tools/apply.php "${ENVIRONMENT}" ../Configuration/settings.csv --groups db || { echo "Error while applying db settings" ; exit 1; }
+        ../tools/zettr.phar apply "${ENVIRONMENT}" ../Configuration/settings.csv --groups db || { echo "Error while applying db settings" ; exit 1; }
 
 
         # Import systemstorage
